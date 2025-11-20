@@ -1,5 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Movie } from '../Movie';
+import { movieService } from '../movie.service';
 
 @Component({
   selector: 'app-movie-detail',
