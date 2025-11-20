@@ -1,28 +1,43 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Movie } from '../Movie';
 import { movieService } from '../movie.service';
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-movie-detail',
   standalone: false,
   templateUrl: './movie-detail.component.html',
-  styleUrl: './movie-detail.component.css',
+  styleUrls: ['./movie-detail.component.css'],
 })
-export class MovieDetailComponent implements OnInit, OnChanges {
-  @Input() movie: any;
+export class MovieDetailComponent implements OnInit {
+  movie: Movie | any = null;
   safeTrailerUrl: SafeResourceUrl | null = null;
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private route: ActivatedRoute,
+    private movieService: movieService
+  ) {}
 
   ngOnInit(): void {
-    this.updateTrailerUrl();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['movie']) {
-      this.updateTrailerUrl();
-    }
+    this.route.paramMap
+      .pipe(
+        switchMap((params: ParamMap) => {
+          const idParam = params.get('id');
+          const id = idParam ? Number(idParam) : NaN;
+          if (!isNaN(id)) {
+            return this.movieService.Getmovie(id);
+          }
+          return of(null);
+        })
+      )
+      .subscribe((movie) => {
+        this.movie = movie;
+        this.updateTrailerUrl();
+      });
   }
 
   private updateTrailerUrl(): void {
